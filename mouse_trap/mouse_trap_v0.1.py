@@ -7,9 +7,6 @@ print("Start")
 wp.wiringPiSetup()  # cleaning up in case wpS have been preactivated
 
 switch_pin_1 = 2
-
-wp.pinMode(switch_pin_1, 0)  # input
-
 step_pins = [3, 4, 6, 9]
 
 # Set all pins as output
@@ -42,6 +39,7 @@ rv[3] = [1, 0, 0, 0]
 
 toggle = 0
 
+
 def move(seq):
     for i in range(0, 25):                   # 1/8 rotation
         print(i)
@@ -59,6 +57,7 @@ def move(seq):
 
 # Start main loop
 try:
+
     while True:
 
         if (wp.digitalRead(switch_pin_1) == 0):  # input is active low (pull up)
