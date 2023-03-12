@@ -5,32 +5,25 @@ import sys
 
 #SETUP
 print("Start")
-switch_pin_1 = 2
-switch_pin_2 = 1
-relay_pin_1 = 4
-relay_pin_2 = 6
+relay_pin = 1
 
 wiringpi.wiringPiSetup()
-wiringpi.pinMode(switch_pin_1, 0) # input
-wiringpi.pinMode(switch_pin_2, 0) # input
 
-wiringpi.pinMode(relay_pin_1, 1) # output
-wiringpi.pinMode(relay_pin_2, 1) # output
+wiringpi.pinMode(relay_pin, 1) # output
 
+on_off = ""
 
 #MAIN
 try:
     while True:
-        wiringpi.digitalWrite(relay_pin_1, 1)
-        wiringpi.digitalWrite(relay_pin_2, 1)
+        on_off = input("Enter 1 or 0: ")
+        if on_off == "1":
+            wiringpi.digitalWrite(relay_pin, 1)
+        elif on_off == "0":
+            wiringpi.digitalWrite(relay_pin, 0)
+        else:
+            print("Invalid input")
 
-        if(wiringpi.digitalRead(switch_pin_1) == 0): #input is active low (pull up)
-            print("activate relay 1")
-            wiringpi.digitalWrite(relay_pin_1, 0)
-
-        if(wiringpi.digitalRead(switch_pin_2) == 0): #input is active low (pull up)
-            print("activate relay 2")
-            wiringpi.digitalWrite(relay_pin_2, 0)
 
 except KeyboardInterrupt:
     pass
