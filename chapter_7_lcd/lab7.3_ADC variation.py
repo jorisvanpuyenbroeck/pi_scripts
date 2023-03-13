@@ -30,6 +30,12 @@ def readadc(adcnum):
     adcout = ((recvData[1]&3) << 8) + recvData[2] 
     return adcout
 
+def stars(value):
+    stars = ""
+    number = int(value/102.4) + 1 # 102.4 = 1024/10
+    for i in range(0, number):
+        stars = stars + "*"
+    return stars
 
 # general setup
 wiringpi.wiringPiSetup() 
@@ -67,17 +73,14 @@ try:
         adc_value0 = readadc(0) # read adc value on channel 0
         DeactivateADC()
 
-        ActivateADC()
-        adc_value1 = readadc(1) # read adc value on channel 0
-        DeactivateADC()
+        print("ADC value on display in0=" + str(adc_value0))
 
-        print("Input ADC value in0: ", adc_value0)
-        print("Input ADC value in1: ", adc_value1)   
+        stars_string = stars(adc_value0)
 
         ActivateLCD()
         lcd_1.clear()
         lcd_1.go_to_xy(0, 0)
-        lcd_1.put_string('ADC value \non display \nin0=' + str(adc_value0) + '\nin1=' + str(adc_value1))
+        lcd_1.put_string('ADC value \non display \nin0=' + stars_string)
         lcd_1.refresh()
         DeactivateLCD()
 
