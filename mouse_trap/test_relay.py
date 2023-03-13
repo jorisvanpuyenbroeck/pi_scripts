@@ -5,7 +5,7 @@ import sys
 
 #SETUP
 print("Start")
-relay_pin = 1
+relay_pin = 2
 
 wiringpi.wiringPiSetup()
 
@@ -18,9 +18,9 @@ try:
     while True:
         on_off = input("Enter 1 or 0: ")
         if on_off == "1":
-            wiringpi.digitalWrite(relay_pin, 1)
+            wiringpi.digitalWrite(relay_pin, True)
         elif on_off == "0":
-            wiringpi.digitalWrite(relay_pin, 0)
+            wiringpi.digitalWrite(relay_pin, False)
         else:
             print("Invalid input")
 
