@@ -51,29 +51,53 @@ wiringpi.pinMode(pin_CS_lcd , 1)            # Set pin to mode 1 ( OUTPUT )
 ActivateLCD()
 lcd_1 = LCD(PIN_OUT)
 
-# Setup MPD
+# Setup MPD and connect
 
 client = MPDClient()
-client.connect("localhost", 6600)
 
+try:
+    client.connect("localhost", 6600)
+except ConnectionError:
+    sys.exit("Connection to MPD failed")
+
+# radio stations
+
+stations = [
+"http://icecast.vrtcdn.be/radio1-high.mp3",
+"http://icecast.vrtcdn.be/ra2ant-high.mp3",
+"http://icecast.vrtcdn.be/klara-high.mp3",
+"http://icecast.vrtcdn.be/stubru-high.mp3",
+"http://icecast.vrtcdn.be/mnm-high.mp3" ]
+
+# rest playlist and add stations
+client.clear()
+for i in range(len(stations)):
+    client.add(stations[i])
 
 
 #MAIN
 try:
+    client.play()
+    current_station = client.currentsong()
     while True:
         if(wiringpi.digitalRead(button_pin_1) == 1): #input is active high (pull down)
-            print("button 1 pressed")
+            client.next()
+            current_station = str(client.currentsong().get('name'))
+            print("Next channel : " + current_station)
+            PrintLCD(current_station)
             time.sleep(0.2)
 
         if(wiringpi.digitalRead(button_pin_2) == 1): #input is active high (pull down)
-            print("button 2 pressed")
+            client.previous()
+            current_station = str(client.currentsong().get('name'))
+            print("Previous channel : " + current_station)
+            PrintLCD(current_station)
             time.sleep(0.2)
-        
-        PrintLCD("Hello World")
-
 
 
 except KeyboardInterrupt:
+    client.stop()
+    client.disconnect()
     lcd_1.clear()
     lcd_1.refresh()
     lcd_1.set_backlight(1)
