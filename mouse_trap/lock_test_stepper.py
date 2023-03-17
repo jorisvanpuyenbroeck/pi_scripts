@@ -1,5 +1,6 @@
 import time
 import wiringpi as wp
+from config.stepper_conf import fw, rv
 
 # SETUP
 print("Start")
@@ -20,29 +21,11 @@ time.sleep(0.5)
 # Define some settings
 
 WaitTime = 0.002
-
-# forward
-
-fw = [0, 1, 2, 3]
-fw[0] = [1, 0, 0, 0]
-fw[1] = [0, 1, 0, 0]
-fw[2] = [0, 0, 1, 0]
-fw[3] = [0, 0, 0, 1]
-
-# reverse
-
-rv = [0, 1, 2, 3]
-rv[0] = [0, 0, 0, 1]
-rv[1] = [0, 0, 1, 0]
-rv[2] = [0, 1, 0, 0]
-rv[3] = [1, 0, 0, 0]
-
-toggle = 0
+Locked = False
 
 
 def move(seq):
-    for i in range(0, 25):                   # 1/8 rotation
-        print(i)
+    for i in range(0, 100):                   # 100 is 1/3 rotation to open/close lock
         for step in range(0, 4):
             for pin in range(0, 4):
                 xpin = step_pins[pin]       # get GPIO number
@@ -52,27 +35,34 @@ def move(seq):
                     wp.digitalWrite(xpin, False)
             # Wait before moving on
             time.sleep(WaitTime)
-            print("step")
 
 
 # Start main loop
 try:
-
     while True:
-
-        if (wp.digitalRead(switch_pin_1) == 0):  # input is active low (pull up)
-            print("button pressed ")
-            if toggle == 0:
+        text = input("Press 'l' to lock, 'o' to open, 'q' to quit: ")
+        if text == 'q':
+            if Locked == True:
+                print("opening ")
                 move(rv)
-                toggle = 1
-            else:
-                move(fw)
-                toggle = 0
-
+                Locked = False
+            break
+        elif text == 'l' and Locked == False:
+            print("locking ")
+            move(fw)
+            Locked = True
+        elif text == 'o' and Locked == True:
+            print("opening ")
+            move(rv)
+            Locked = False
         else:
-            print("button 1 released")
-
+            print("Cannot do that")
 except KeyboardInterrupt:
+    # before exiting we need to make sure the lock is open
+    if Locked == True:
+        print("opening ")
+        move(rv)
+        Locked = False
     pass
 # cleanup
 print("Done")
