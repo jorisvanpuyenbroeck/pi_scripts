@@ -1,11 +1,16 @@
+import wiringpi as wp
+
+dcmotor_pin1 = 2
+dcmotor_pin2 = 5
+
 def pullUp(speed):
-	wiringpi.softPwmWrite(pin2, 0)
-	wiringpi.softPwmWrite(pin5, speed)
+	wp.softPwmWrite(dcmotor_pin1, 0)
+	wp.softPwmWrite(dcmotor_pin2, speed)
 
 def pullDown(speed):
-	wiringpi.softPwmWrite(pin2, speed)
-	wiringpi.softPwmWrite(pin5, 0)
+	wp.softPwmWrite(dcmotor_pin1, speed)
+	wp.softPwmWrite(dcmotor_pin2, 0)
 
 def fullStop():
-	wiringpi.softPwmWrite(pin2, 0)
-	wiringpi.softPwmWrite(pin5, 0)
+	wp.softPwmWrite(dcmotor_pin1, 0)
+	wp.softPwmWrite(dcmotor_pin2, 0)
