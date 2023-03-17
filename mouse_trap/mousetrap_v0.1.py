@@ -43,7 +43,6 @@ try:
 			if locked == True:
 				locked = unlock()
 			pullUp(speed)
-			time.sleep(2) # wait for the door to open
 			measurement = measure()
 			print("Status : Open, Distance: ", measurement)
 		elif text == 'd':
@@ -54,7 +53,6 @@ try:
 			time.sleep(0.5)
 			fullStop()
 			locked = lock()
-			time.sleep(0.5) # wait for the door to close
 			measurement = measure()
 			print("Status : Closed, Distance: ", measurement)
 		else:
