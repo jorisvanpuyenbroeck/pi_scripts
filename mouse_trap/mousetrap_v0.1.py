@@ -3,11 +3,13 @@ import wiringpi as wp
 import sys
 from door.dcmotor import pullDown, pullUp, fullStop
 from lock.stepper import lock, unlock
-
+from distance.distance_sensor import measure
 
 
 # SETUP
 print("Start")
+echo_pin = 0
+trig_pin = 1
 dcmotor_pin1 = 2
 dcmotor_pin2 = 5
 release_time = 0.5
@@ -16,6 +18,10 @@ locked = False
 step_pins = [3, 4, 6, 9]
 
 wp.wiringPiSetup()
+
+# Set dist_sensors pins as output and input
+wp.pinMode(trig_pin, 1)     # output
+wp.pinMode(echo_pin, 0)     # input
 
 # Set all stepper pins as output
 for pin in step_pins:
@@ -26,11 +32,10 @@ for pin in step_pins:
 wp.softPwmCreate(dcmotor_pin1, 0, 100)
 wp.softPwmCreate(dcmotor_pin2, 0, 100)
 
-# Start PWM
-
-
 try:
 	while True:
+		measurement = measure()
+		print("Distance: ", measurement)
 		text = input("Press 'u' to pull up, 'd' to pull down, 'q' to quit: ")
 		if text == 'q':
 			fullStop()
