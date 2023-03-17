@@ -12,7 +12,6 @@ echo_pin = 0
 trig_pin = 1
 dcmotor_pin1 = 2
 dcmotor_pin2 = 5
-release_time = 0.5
 speed = 100
 locked = False
 step_pins = [3, 4, 6, 9]
@@ -34,8 +33,6 @@ wp.softPwmCreate(dcmotor_pin2, 0, 100)
 
 try:
 	while True:
-		measurement = measure()
-		print("Distance: ", measurement)
 		text = input("Press 'u' to pull up, 'd' to pull down, 'q' to quit: ")
 		if text == 'q':
 			fullStop()
@@ -46,18 +43,25 @@ try:
 			if locked == True:
 				locked = unlock()
 			pullUp(speed)
-			# time.sleep(pull_time) we keep pulling up until we get a 'd'
+			time.sleep(2) # wait for the door to open
+			measurement = measure()
+			print("Status : Open, Distance: ", measurement)
 		elif text == 'd':
 			if locked == True:
 				locked = unlock()
 			fullStop()
 			pullDown(speed)
-			time.sleep(release_time)
+			time.sleep(0.5)
 			fullStop()
 			locked = lock()
+			time.sleep(0.5) # wait for the door to close
+			measurement = measure()
+			print("Status : Closed, Distance: ", measurement)
 		else:
 			print("Invalid input")
 
 except KeyboardInterrupt:
 	fullStop()
+	if locked == True:
+		locked = unlock()
 	print("\nDone")

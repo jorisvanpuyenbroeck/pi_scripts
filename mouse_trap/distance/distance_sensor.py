@@ -20,5 +20,4 @@ def measure():
     signal_time = signal_end - signal_start
     distance = signal_time * 17000
     time.sleep(0.5)
-    print("Distance: ", distance)
     return distance
