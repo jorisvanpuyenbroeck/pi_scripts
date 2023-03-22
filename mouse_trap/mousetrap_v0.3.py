@@ -1,6 +1,7 @@
 import time
 import wiringpi as wp
 import sys
+import threading
 from door.dcmotor import pullDown, pullUp, fullStop
 from lock.stepper import lock, unlock
 from distance.distance_sensor import measure
