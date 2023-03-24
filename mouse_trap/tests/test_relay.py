@@ -5,7 +5,7 @@ import sys
 
 #SETUP
 print("Start")
-relay_pin = 2
+relay_pin = 15
 
 wiringpi.wiringPiSetup()
 

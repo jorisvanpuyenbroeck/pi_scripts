@@ -1,9 +1,7 @@
-
 import time
 import wiringpi
-import spidev
 from ch7_ClassLCD import LCD
-from ch7_ClassLCD import LCD
+
 
 
 def ActivateLCD():
