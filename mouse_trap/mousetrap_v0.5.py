@@ -2,6 +2,7 @@ import time
 import wiringpi as wp
 import sys
 import threading
+import requests
 from door.dcmotor import pullDown, pullUp, fullStop
 from lock.stepper import lock, unlock
 from distance.distance_sensor import measure
@@ -29,6 +30,9 @@ red = False
 light = False
 number_trapped = 0
 step_pins = [3, 4, 6, 9]
+url = "http://itfactory012345678.hub.ubeac.io/iotjorisvp"
+uid = "iotjorisvp"
+status = 0
 exit_event = threading.Event()
 green_pressed = threading.Event()
 red_pressed = threading.Event()
@@ -41,10 +45,6 @@ PIN_OUT     =   {
                 'RST'   :   10,
                 'LED'   :   12,   
 }
-
-
-ActivateLCD()
-lcd = LCD(PIN_OUT)
 
 wp.wiringPiSetup()
 
@@ -68,9 +68,11 @@ wp.pinMode(light_pin, 1)
 wp.pinMode(green_pin, 0)         # Set pin to mode 0 ( INPUT )
 wp.pinMode(red_pin, 0)  
 
-# Set SPI pins as output
+# Set SPI pins as output and activate lcd
 wp.wiringPiSPISetupMode(1, 0, 400000, 0)  #(channel, port, speed, mode)
 wp.pinMode(pin_CS_lcd , 1)            # Set pin to mode 1 ( OUTPUT )
+ActivateLCD()
+lcd = LCD(PIN_OUT)
 
 #create two new threads
 t1 = threading.Thread(target=buttons, args=(green_pressed, red_pressed, exit_event))
@@ -87,21 +89,26 @@ try:
 
 	while True:
 
+		# lcd output
 		current_time = time.time()
 		date_string = time.strftime("%d/%m/%Y", time.localtime(current_time))
 		time_string = time.strftime("%H:%M:%S", time.localtime(current_time))
 		trapped_string = str(number_trapped)
 
-		if open:
-			status_string = 'Armed'
-		else:
-			status_string = 'Triggered'
+		status_string = 'Armed' if open else 'Trapped'
+
 		ActivateLCD()
 		lcd.clear()
 		lcd.go_to_xy(0, 0)
-		lcd.put_string(date_string + '\n' + time_string + '\n' + 'Stat' + status_string + '\n' + 'Trapped' + trapped_string + '\n')
+		lcd.put_string(date_string + '\n' + time_string + '\n' + 'Stat: ' + status_string + '\n' + 'Trapped: ' + trapped_string + '\n')
 		lcd.refresh()
 		DeactivateLCD()
+
+		# ubeac output
+
+		status = 100 if open else 0
+		data= {"id": uid,"sensors":[{'id': 'status','data': status},{'id': 'number trapped','data': number_trapped}]}
+		r = requests.post(url, verify=False, json=data)
 
 		if green_pressed.is_set():
 			print("Green button pressed")
@@ -132,8 +139,7 @@ try:
 				red = False
 
 		if not must_open and open:   # catch
-			if locked:
-				locked = unlock()
+			locked = unlock() if locked else locked
 			fullStop()
 			pullDown(speed)
 			time.sleep(0.5)
@@ -145,8 +151,7 @@ try:
 			number_trapped += 1
 			print("Status : Closed, Distance: ", measurement)
 		elif must_open and not open: # release
-			if locked:
-				locked = unlock()
+			locked = unlock() if locked else locked
 			pullUp(speed)
 			open = True
 			measurement = measure()
@@ -165,10 +170,8 @@ except KeyboardInterrupt:
 	lcd.set_backlight(1)
 	DeactivateLCD()
 	fullStop()
-	if locked:
-		locked = unlock()
-	if light:
-		light = light_off()
+	locked = unlock() if locked else locked
+	light = light_off() if light else light
 	pullUp(speed)
 	fullStop()
 	print("\nDone")
