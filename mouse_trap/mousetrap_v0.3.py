@@ -48,7 +48,7 @@ wp.pinMode(red_pin, 0)
 
 #create two new threads
 t1 = threading.Thread(target=buttons, args=(green_pressed, red_pressed, exit_event))
-t2 = threading.Thread(target=lcd)
+t2 = threading.Thread(target=lcd, args=(exit_event,))
 
 #start the threads
 t1.start()
@@ -109,8 +109,11 @@ try:
 			time.sleep(1)
 
 except KeyboardInterrupt:
+	print("KeyboardInterrupt")
+	exit_event.set()
 	fullStop()
 	if locked == True:
 		locked = unlock()
 	pullUp(speed)
+	fullStop()
 	print("\nDone")
