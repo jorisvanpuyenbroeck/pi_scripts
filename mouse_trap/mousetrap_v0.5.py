@@ -10,6 +10,7 @@ from button.button import buttons
 from light.relay import light_on, light_off
 from screen.lcd import ActivateLCD, DeactivateLCD
 from screen.ClassLCD import LCD
+from live.stream import open_stream, close_stream
 
 # SETUP
 print("Start")
@@ -28,6 +29,7 @@ must_open = False
 green = False
 red = False
 light = False
+stream = False
 number_trapped = 0
 step_pins = [3, 4, 6, 9]
 url = "http://itfactory012345678.hub.ubeac.io/iotjorisvp"
@@ -81,6 +83,12 @@ t1 = threading.Thread(target=buttons, args=(green_pressed, red_pressed, exit_eve
 #start the threads
 t1.start()
 # t2.start()
+
+# main loop
+
+# start streaming
+
+stream = open_stream()
 
 try:
 	
@@ -174,4 +182,5 @@ except KeyboardInterrupt:
 	light = light_off() if light else light
 	pullUp(speed)
 	fullStop()
+	stream = close_stream()
 	print("\nDone")
