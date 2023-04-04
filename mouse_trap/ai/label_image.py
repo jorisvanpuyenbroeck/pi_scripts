@@ -10,7 +10,7 @@ def is_mouse():
   input_mean = 127.5
   input_std = 127.5
   num_threads = 1
-  labels = ['0 sock', '1 mouse', '2 background']
+  labels = ['0 cat', '1 mouse', '2 background']
 
   interpreter = tflite.Interpreter(
       model_path= model_file,
@@ -54,6 +54,8 @@ def is_mouse():
   print('time: {:.3f}ms'.format((stop_time - start_time) * 1000))
 
   if results[1] > results[0]:
+      print("Picture analysis confirms mouse")
       return True
   else:
+      print("Picture analysis does not confirm mouse")
       return False

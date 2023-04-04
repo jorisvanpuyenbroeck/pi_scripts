@@ -26,7 +26,7 @@ pin_CS_lcd = 13
 speed = 100
 locked = False
 open = True
-must_open = False
+must_open = True
 stay_closed = False
 green = False
 red = False
@@ -136,33 +136,40 @@ try:
 		if measurement <= 15 :
 			print("Object in cage. Door must be closed")
 			must_open = False
-			if green:
-				print("Green button was pressed. Door must be opened")
-				must_open = True
-				green = False
-			if red:
-				print("Red button was pressed. Door must be closed")
-				must_open = False
-				red = False
+
 			if mouse and scanned:
-				print("Object recognised as mouse. Must trap.")
+				print("Object was recognised as mouse. Must trap.")
 				must_open = False
 				stay_closed = True
-				mouse = False
 				number_trapped += 1
-			elif scanned:
-				print("Object not recognised as mouse. Must release.")
+
+			elif not mouse and not scanned:
+				print("Object was not yet recognised as mouse. Must close and scan first.")
+				must_open = False
+				stay_closed = False
+				scanned = False
+
+			else:
+				print("Object was not recognised as mouse. Must release")
 				must_open = True
 				stay_closed = False
-			else:
-				print("Object not scanned. Must evaluate.")
+
+			if green:
+				print("Green button was pressed. Door must be opened.")
+				must_open = True
+				scanned = False
+				mouse = False
+				stay_closed = False
+			if red:
+				print("Red button was pressed. Door must be closed.")
 				must_open = False
-				stay_closed = True
+				red = False
 
 		else :
 			print("No object in cage. Door must be opened")
 			must_open = True
 			scanned = False
+			stay_closed = False
 			if green:
 				print("Green button was pressed. Door must be opened")
 				must_open = True
@@ -189,24 +196,30 @@ try:
 				mouse = is_mouse()
 				scanned = True
 			print("Status : Closed, Distance: ", measurement)
+		
+		elif not must_open and not open: # stay closed
+			measurement = measure()
+			open = False
+			print("Status : Closed, Distance: ", measurement)
+			time.sleep(1)
 
 		elif must_open and not open: # release
 			locked = unlock() if locked else locked
 			if not stay_closed:
 				pullUp(speed)
 			open = True
+			if green:
+				print("Granting 10 secs to remove object")
+				time.sleep(10)
+				green = False
 			measurement = measure()
 			light = light_off()
 			print("Status : Open, Distance: ", measurement)
-		
-		elif stay_closed and not open: # stay closed
-			measurement = measure()
-			open = False
-			print("Status : Closed, Distance: ", measurement)
 			time.sleep(1)
 
 		else:
 			measurement = measure()
+			open = True
 			print("Status : Observing, Distance: ", measurement)
 			time.sleep(1)
 
