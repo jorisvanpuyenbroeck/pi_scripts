@@ -27,11 +27,13 @@ speed = 100
 locked = False
 open = True
 must_open = False
+stay_closed = False
 green = False
 red = False
 light = False
 stream = False
 mouse = False
+scanned = False
 number_trapped = 0
 step_pins = [3, 4, 6, 9]
 url = "http://itfactory012345678.hub.ubeac.io/iotjorisvp"
@@ -131,21 +133,45 @@ try:
 
 		measurement = measure()
 		
-		if measurement >= 30 :
+		if measurement <= 15 :
 			print("Object in cage. Door must be closed")
 			must_open = False
 			if green:
-				print("However, green button was pressed. Door must be opened")
+				print("Green button was pressed. Door must be opened")
 				must_open = True
 				green = False
+			if red:
+				print("Red button was pressed. Door must be closed")
+				must_open = False
+				red = False
+			if mouse and scanned:
+				print("Object recognised as mouse. Must trap.")
+				must_open = False
+				stay_closed = True
+				mouse = False
+				number_trapped += 1
+			elif scanned:
+				print("Object not recognised as mouse. Must release.")
+				must_open = True
+				stay_closed = False
+			else:
+				print("Object not scanned. Must evaluate.")
+				must_open = False
+				stay_closed = True
 
 		else :
 			print("No object in cage. Door must be opened")
 			must_open = True
+			scanned = False
+			if green:
+				print("Green button was pressed. Door must be opened")
+				must_open = True
+				green = False
 			if red:
-				print("However, red button was pressed. Door must be closed")
+				print("Red button was pressed. Door must be closed")
 				must_open = False
 				red = False
+
 
 		if not must_open and open:   # catch
 			locked = unlock() if locked else locked
@@ -153,27 +179,32 @@ try:
 			pullDown(speed)
 			time.sleep(0.5)
 			fullStop()
+			stay_closed = True
 			locked = lock()
 			measurement = measure()
 			open = False
 			light = light_on()
-			take_picture()
-			mouse = is_mouse()
-			if mouse:
-				print("Object recognised as mouse. Must trap.")
-				number_trapped += 1
-				must_open = False
-			else:
-				print("Object not recognised as mouse. Must release.")
-				must_open = True
+			if not scanned:
+				take_picture()
+				mouse = is_mouse()
+				scanned = True
+			print("Status : Closed, Distance: ", measurement)
 
 		elif must_open and not open: # release
 			locked = unlock() if locked else locked
-			pullUp(speed)
+			if not stay_closed:
+				pullUp(speed)
 			open = True
 			measurement = measure()
 			light = light_off()
 			print("Status : Open, Distance: ", measurement)
+		
+		elif stay_closed and not open: # stay closed
+			measurement = measure()
+			open = False
+			print("Status : Closed, Distance: ", measurement)
+			time.sleep(1)
+
 		else:
 			measurement = measure()
 			print("Status : Observing, Distance: ", measurement)
@@ -186,10 +217,8 @@ except KeyboardInterrupt:
 	lcd.refresh()
 	lcd.set_backlight(1)
 	DeactivateLCD()
-	fullStop()
 	locked = unlock() if locked else locked
 	light = light_off() if light else light
 	pullUp(speed)
-	fullStop()
 	stream = close_stream()
 	print("\nDone")

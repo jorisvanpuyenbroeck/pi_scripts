@@ -9,7 +9,7 @@ def is_mouse():
   model_file = './ai/model_unquant.tflite'
   input_mean = 127.5
   input_std = 127.5
-  num_threads = 3
+  num_threads = 1
   labels = ['0 sock', '1 mouse', '2 background']
 
   interpreter = tflite.Interpreter(

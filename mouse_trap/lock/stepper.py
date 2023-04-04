@@ -33,11 +33,11 @@ def move(seq):
             time.sleep(wait_time)
 
 def lock():
-    print("locking ")
+    print("Locking ")
     move(fw)
     return True
 
 def unlock():
-    print("unlocking ")
+    print("Unlocking ")
     move(rv)
     return False
